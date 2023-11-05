@@ -224,32 +224,6 @@ class DeltaToMarkdown extends Converter<Delta, String>
   }
 
   @override
-  StringSink visitText(Text text, [StringSink? output]) {
-    final out = output ??= StringBuffer();
-    final style = text.style;
-    _handleAttribute(
-      _textAttrsHandlers,
-      text,
-      output,
-      () {
-        var content = text.value;
-        if (!(style.containsKey(Attribute.codeBlock.key) ||
-            style.containsKey(Attribute.inlineCode.key) ||
-            (text.parent?.style.containsKey(Attribute.codeBlock.key) ??
-                false))) {
-          content = content.replaceAllMapped(
-              RegExp(r'[\\\`\*\_\{\}\[\]\(\)\#\+\-\.\!\>\<]'), (match) {
-            return '\\${match[0]}';
-          });
-        }
-        out.write(content);
-      },
-      sortedAttrsBySpan: true,
-    );
-    return out;
-  }
-
-  @override
   StringSink visitEmbed(Embed embed, [StringSink? output]) {
     final out = output ??= StringBuffer();
 
@@ -303,8 +277,6 @@ abstract class _NodeVisitor<T> {
 
   T visitLine(Line line, [T? context]);
 
-  T visitText(Text text, [T? context]);
-
   T visitEmbed(Embed embed, [T? context]);
 }
 
@@ -317,8 +289,6 @@ extension _NodeX on Node {
         return visitor.visitBlock(this as Block, context);
       case Line:
         return visitor.visitLine(this as Line, context);
-      case Text:
-        return visitor.visitText(this as Text, context);
       case Embed:
         return visitor.visitEmbed(this as Embed, context);
     }
